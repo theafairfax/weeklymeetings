@@ -85,6 +85,11 @@ def _meals_phase(meal_df, view_df):
     if carry_list and not st.session_state.cw_carry_used:
         st.info(f"🍽️ Carried over from last week: **{', '.join(carry_list)}**")
         if st.button("↩️ Pull carryover meals into this week"):
+            # Clear dropdown memory for any day that will receive a carryover meal
+            for i, d in enumerate(DAYS):
+                if i < len(carry_list) and f"cw_meal_sel_{d}" in st.session_state:
+                    del st.session_state[f"cw_meal_sel_{d}"]
+            
             st.session_state.cw_meals = shuffle_meals(
                 pool, carryover=carry_list, existing=st.session_state.cw_meals
             )
@@ -94,34 +99,22 @@ def _meals_phase(meal_df, view_df):
     col_a, col_b = st.columns([1, 1])
     with col_a:
         if st.button("🎲 Shuffle All Meals"):
-            # 1. Clear out old dropdown memory so they reset
+            # Clear out dropdown memory completely so they all reset
             for d in DAYS:
                 if f"cw_meal_sel_{d}" in st.session_state:
                     del st.session_state[f"cw_meal_sel_{d}"]
             
-            # 2. Shuffle and rerun
+            st.session_state.cw_meals = {}
             st.session_state.cw_meals = shuffle_meals(pool)
             st.rerun()
 
     with col_b:
         if st.button("🎲 Shuffle Remaining Days"):
-            # 1. Clear memory ONLY for days that don't have a meal set yet
+            # Clear dropdown memory ONLY for days that don't have a meal set yet
             for d in DAYS:
                 if not st.session_state.cw_meals.get(d) and f"cw_meal_sel_{d}" in st.session_state:
                     del st.session_state[f"cw_meal_sel_{d}"]
                     
-            # 2. Shuffle remaining and rerun
-            st.session_state.cw_meals = shuffle_meals(pool, existing=st.session_state.cw_meals)
-            st.rerun()
-            
-    with col_b:
-        # 1. This loop runs and finishes entirely on its own
-        for d in DAYS:
-            if not st.session_state.cw_meals.get(d) and f"cw_meal_sel_{d}" in st.session_state:
-                del st.session_state[f"cw_meal_sel_{d}"]
-                    
-        # 2. The button sits outside the loop (aligned with 'for') so it only renders once!
-        if st.button("🎲 Shuffle Remaining Days"):
             st.session_state.cw_meals = shuffle_meals(pool, existing=st.session_state.cw_meals)
             st.rerun()
 
@@ -130,44 +123,6 @@ def _meals_phase(meal_df, view_df):
         current = st.session_state.cw_meals.get(d, "")
         options = pool[:] if pool else ["(add meals to your Meal Library)"]
         if current and current not in options:
-            options = [current] + options
-        c1, c2, c3 = st.columns([1, 4, 1])
-        with c1:
-            st.markdown(f"<div class='day-label' style='padding-top:0.6rem;'>{d}</div>", unsafe_allow_html=True)
-        with c2:
-            idx = options.index(current) if current in options else 0
-            choice = st.selectbox(
-                f"{d} dinner", options, index=idx, key=f"cw_meal_sel_{d}",
-                label_visibility="collapsed",
-            )
-            st.session_state.cw_meals[d] = choice
-        with c3:
-            if st.button("🎲", key=f"cw_meal_reroll_{d}", help=f"Reroll {d}'s dinner"):
-                if pool:
-                    # Delete the widget key first so it adopts the new choice seamlessly
-                    if f"cw_meal_sel_{d}" in st.session_state:
-                        del st.session_state[f"cw_meal_sel_{d}"]
-                    st.session_state.cw_meals[d] = random.choice(pool)
-                    st.rerun()
-
-    with st.expander("➕ Add a new item to the Meal Library"):
-        kind = st.radio("Type", ["Protein", "Side", "Course"], horizontal=True, key="cw_new_meal_kind")
-        new_val = st.text_input("Name", key="cw_new_meal_val")
-        if st.button("Add to library", key="cw_add_meal_btn"):
-            if new_val.strip():
-                new_row = pd.DataFrame([{"Protein": "", "Side": "", "Course": ""}])
-                new_row.loc[0, kind] = new_val.strip()
-                updated = pd.concat([meal_df, new_row], ignore_index=True)
-                save_meal_library(updated)
-                st.success(f"Added '{new_val.strip()}' to {kind}s.")
-                st.rerun()
-            else:
-                st.warning("Enter a name first.")
-
-    st.markdown("---")
-    if st.button("✅ Approve Meals"):
-        st.session_state.cw_meals_approved = True
-        st.success("Meals approved. Move on to the Tasks tab →")
 
 
 # ── Phase 2: Tasks ──────────────────────────────────────────────────────
