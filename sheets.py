@@ -3,8 +3,8 @@ sheets.py — Google Sheets connection + read/write helpers for the
 Weekly Meetings app.
 
 Backed by st.connection("gsheets", type=GSheetsConnection) from the
-streamlit-gsheets package. See SETUP.md for how to point this at your
-spreadsheet.
+st-gsheets-connection package (imported as streamlit_gsheets). See
+SETUP.md for how to point this at your spreadsheet.
 """
 import streamlit as st
 import pandas as pd
