@@ -118,12 +118,12 @@ def _meals_phase(meal_df, view_df):
             st.session_state.cw_meals = shuffle_meals(pool, existing=st.session_state.cw_meals)
             st.rerun()
 
-st.markdown("---")
-for d in DAYS:
-    current = st.session_state.cw_meals.get(d, "")
-    options = pool[:] if pool else ["(add meals to your Meal Library)"]
-    if current and current not in options:
-        options = [current] + options
+    st.markdown("---")
+    for d in DAYS:
+        current = st.session_state.cw_meals.get(d, "")
+        options = pool[:] if pool else ["(add meals to your Meal Library)"]
+        if current and current not in options:
+            options = [current] + options
             
     c1, c2, c3 = st.columns([1, 4, 1])
     with c1:
