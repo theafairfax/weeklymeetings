@@ -1,7 +1,7 @@
 """
 create_week.py — plan the upcoming week: meals, tasks, aims, then save.
 """
-import random
+import random  # <--- MAKE SURE THIS LINE IS PRESENT HERE
 import streamlit as st
 import pandas as pd
 
