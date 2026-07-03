@@ -115,12 +115,13 @@ def _meals_phase(meal_df, view_df):
             st.rerun()
             
     with col_b:
-        if st.button("🎲 Shuffle Remaining Days"):
-            # Clean out widget states only for empty/unset days before shuffling remaining slots
-            for d in DAYS:
-                if not st.session_state.cw_meals.get(d) and f"cw_meal_sel_{d}" in st.session_state:
-                    del st.session_state[f"cw_meal_sel_{d}"]
+        # 1. This loop runs and finishes entirely on its own
+        for d in DAYS:
+            if not st.session_state.cw_meals.get(d) and f"cw_meal_sel_{d}" in st.session_state:
+                del st.session_state[f"cw_meal_sel_{d}"]
                     
+        # 2. The button sits outside the loop (aligned with 'for') so it only renders once!
+        if st.button("🎲 Shuffle Remaining Days"):
             st.session_state.cw_meals = shuffle_meals(pool, existing=st.session_state.cw_meals)
             st.rerun()
 
