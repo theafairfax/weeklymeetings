@@ -122,7 +122,7 @@ def _meals_phase(meal_df, view_df):
     for d in DAYS:
         current = st.session_state.cw_meals.get(d, "")
         options = pool[:] if pool else ["(add meals to your Meal Library)"]
-        if current and current not in options:
+    if current and current not in options:
 
     st.markdown("---")
     if st.button("✅ Approve Meals"):
