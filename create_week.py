@@ -124,6 +124,10 @@ def _meals_phase(meal_df, view_df):
         options = pool[:] if pool else ["(add meals to your Meal Library)"]
         if current and current not in options:
 
+    st.markdown("---")
+    if st.button("✅ Approve Meals"):
+        st.session_state.cw_meals_approved = True
+        st.success("Meals approved. Move on to the Tasks tab →")
 
 # ── Phase 2: Tasks ──────────────────────────────────────────────────────
 def _tasks_phase(task_df):
