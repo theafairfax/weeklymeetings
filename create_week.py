@@ -119,34 +119,34 @@ def _meals_phase(meal_df, view_df):
             st.rerun()
 
 st.markdown("---")
-    for d in DAYS:
-        current = st.session_state.cw_meals.get(d, "")
-        options = pool[:] if pool else ["(add meals to your Meal Library)"]
-        if current and current not in options:
-            options = [current] + options
+for d in DAYS:
+    current = st.session_state.cw_meals.get(d, "")
+    options = pool[:] if pool else ["(add meals to your Meal Library)"]
+    if current and current not in options:
+        options = [current] + options
             
-        c1, c2, c3 = st.columns([1, 4, 1])
-        with c1:
-            st.markdown(f"<div class='day-label' style='padding-top:0.6rem;'>{d}</div>", unsafe_allow_html=True)
-        with c2:
-            idx = options.index(current) if current in options else 0
-            choice = st.selectbox(
-                f"{d} dinner", options, index=idx, key=f"cw_meal_sel_{d}",
-                label_visibility="collapsed",
-            )
-            st.session_state.cw_meals[d] = choice
-        with c3:
-            if st.button("🎲", key=f"cw_meal_reroll_{d}", help=f"Reroll {d}'s dinner"):
-                if pool:
-                    if f"cw_meal_sel_{d}" in st.session_state:
-                        del st.session_state[f"cw_meal_sel_{d}"]
-                    st.session_state.cw_meals[d] = random.choice(pool)
-                    st.rerun()
+    c1, c2, c3 = st.columns([1, 4, 1])
+    with c1:
+        st.markdown(f"<div class='day-label' style='padding-top:0.6rem;'>{d}</div>", unsafe_allow_html=True)
+    with c2:
+        idx = options.index(current) if current in options else 0
+        choice = st.selectbox(
+            f"{d} dinner", options, index=idx, key=f"cw_meal_sel_{d}",
+            label_visibility="collapsed",
+        )
+        st.session_state.cw_meals[d] = choice
+    with c3:
+        if st.button("🎲", key=f"cw_meal_reroll_{d}", help=f"Reroll {d}'s dinner"):
+            if pool:
+                if f"cw_meal_sel_{d}" in st.session_state:
+                    del st.session_state[f"cw_meal_sel_{d}"]
+                st.session_state.cw_meals[d] = random.choice(pool)
+                st.rerun()
 
-    st.markdown("---")
-    if st.button("✅ Approve Meals"):
-        st.session_state.cw_meals_approved = True
-        st.success("Meals approved. Move on to the Tasks tab →")
+st.markdown("---")
+if st.button("✅ Approve Meals"):
+    st.session_state.cw_meals_approved = True
+    st.success("Meals approved. Move on to the Tasks tab →")
 
 # ── Phase 2: Tasks ──────────────────────────────────────────────────────
 def _tasks_phase(task_df):
