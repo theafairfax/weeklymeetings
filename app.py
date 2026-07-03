@@ -85,23 +85,26 @@ div[data-testid="stSidebar"] {
 
 # ── Sidebar navigation ─────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 📜 Household Council")
+    st.markdown("## ⚔️ Arthur Fairfax")
     st.markdown("---")
     page = st.radio(
         "Navigate",
-        ["📚 Week Library", "🛠️ Create Week", "🔍 Review Week"],
+        ["🗺️ Arete", "📋 Daily Entry", "🎯 Aspirations", "📜 Curriculum Vitae"], # ← Added "🎯 Aspirations" here
         label_visibility="collapsed",
     )
     st.markdown("---")
-    st.caption("Data lives in your Google Sheet.\nBuilt for Isaac & Madison's weekly meeting.")
+    st.caption("Data lands in your Google Sheet.\nXP = hours logged since inception.")
 
 # ── Route ─────────────────────────────────────────────────────────────────────
-if page == "📚 Week Library":
-    import week_library
-    week_library.render()
-elif page == "🛠️ Create Week":
-    import create_week
-    create_week.render()
+if page == "🗺️ Arete":
+    import dashboard
+    dashboard.render()
+elif page == "🎯 Aspirations": # ← Added routing step here
+    import aspirations
+    aspirations.render()
+elif page == "📜 Curriculum Vitae":
+    import cv
+    cv.render()
 else:
-    import review_week
-    review_week.render()
+    import entry
+    entry.render()
