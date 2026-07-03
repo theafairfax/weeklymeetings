@@ -94,14 +94,24 @@ def _meals_phase(meal_df, view_df):
     col_a, col_b = st.columns([1, 1])
     with col_a:
         if st.button("🎲 Shuffle All Meals"):
-            st.session_state.cw_meals = {}
-            # 1. Clear out old widget keys so the selectbox re-initializes to your new shuffle
+            # 1. Clear out old dropdown memory so they reset
             for d in DAYS:
                 if f"cw_meal_sel_{d}" in st.session_state:
                     del st.session_state[f"cw_meal_sel_{d}"]
             
-            # 2. Shuffle
+            # 2. Shuffle and rerun
             st.session_state.cw_meals = shuffle_meals(pool)
+            st.rerun()
+
+    with col_b:
+        if st.button("🎲 Shuffle Remaining Days"):
+            # 1. Clear memory ONLY for days that don't have a meal set yet
+            for d in DAYS:
+                if not st.session_state.cw_meals.get(d) and f"cw_meal_sel_{d}" in st.session_state:
+                    del st.session_state[f"cw_meal_sel_{d}"]
+                    
+            # 2. Shuffle remaining and rerun
+            st.session_state.cw_meals = shuffle_meals(pool, existing=st.session_state.cw_meals)
             st.rerun()
             
     with col_b:
