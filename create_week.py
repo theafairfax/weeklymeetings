@@ -143,6 +143,16 @@ def _meals_phase(meal_df, view_df):
     pool = build_meal_pool(meal_df)
     if not pool:
         st.warning("Your Meal Library is empty — add a Protein/Side/Course below first.")
+    elif len(pool) == 1:
+        st.warning(
+            f"Only 1 meal option is available in your pool right now ({pool[0]!r}), "
+            "so shuffling will always land on it. Check your Meal Library — make sure "
+            "Protein/Side/Course columns have more than one distinct entry filled in "
+            "(a blank Side column collapses the pool down to just Courses + Proteins, "
+            "with no combinations)."
+        )
+    else:
+        st.caption(f"{len(pool)} meal options available to shuffle from.")
 
     # look for carryover meals from the most recent past week
     carry_list = []
@@ -153,58 +163,61 @@ def _meals_phase(meal_df, view_df):
     if carry_list and not st.session_state.cw_carry_used:
         st.info(f"🍽️ Carried over from last week: **{', '.join(carry_list)}**")
         if st.button("↩️ Pull carryover meals into this week"):
-            for i, d in enumerate(day_names):
-                if i < len(carry_list) and f"cw_meal_sel_{d}" in st.session_state:
-                    del st.session_state[f"cw_meal_sel_{d}"]
-
-            st.session_state.cw_meals = shuffle_meals(
+            new_meals = shuffle_meals(
                 pool, days=day_names, carryover=carry_list, existing=st.session_state.cw_meals
             )
+            for d in day_names:
+                st.session_state.cw_meals[d] = new_meals.get(d, "")
+                st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.session_state.cw_carry_used = True
             st.rerun()
 
     col_a, col_b = st.columns([1, 1])
     with col_a:
         if st.button("🎲 Shuffle All Meals"):
+            new_meals = shuffle_meals(pool, days=day_names)
             for d in day_names:
-                if f"cw_meal_sel_{d}" in st.session_state:
-                    del st.session_state[f"cw_meal_sel_{d}"]
-            st.session_state.cw_meals = shuffle_meals(pool, days=day_names)
+                st.session_state.cw_meals[d] = new_meals.get(d, "")
+                st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.rerun()
 
     with col_b:
         if st.button("🎲 Shuffle Remaining Days"):
+            new_meals = shuffle_meals(pool, days=day_names, existing=st.session_state.cw_meals)
             for d in day_names:
-                if not st.session_state.cw_meals.get(d) and f"cw_meal_sel_{d}" in st.session_state:
-                    del st.session_state[f"cw_meal_sel_{d}"]
-            st.session_state.cw_meals = shuffle_meals(
-                pool, days=day_names, existing=st.session_state.cw_meals
-            )
+                st.session_state.cw_meals[d] = new_meals.get(d, "")
+                st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.rerun()
 
     st.markdown("---")
     for d in day_names:
-        current = st.session_state.cw_meals.get(d, "")
+        key = f"cw_meal_sel_{d}"
         options = pool[:] if pool else ["(add meals to your Meal Library)"]
-        if current and current not in options:
-            options = [current] + options
+
+        # Seed the widget's own state the first time we see it, or if a
+        # shuffle/carryover wrote a value into cw_meals that the widget
+        # hasn't picked up yet.
+        if key not in st.session_state:
+            current = st.session_state.cw_meals.get(d, "")
+            st.session_state[key] = current if current in options else (options[0] if options else "")
+        elif st.session_state[key] not in options:
+            options = [st.session_state[key]] + options
 
         c1, c2, c3 = st.columns([1, 4, 1])
         with c1:
             st.markdown(f"<div class='day-label' style='padding-top:0.6rem;'>{d}</div>", unsafe_allow_html=True)
         with c2:
-            idx = options.index(current) if current in options else 0
             choice = st.selectbox(
-                f"{d} dinner", options, index=idx, key=f"cw_meal_sel_{d}",
+                f"{d} dinner", options, key=key,
                 label_visibility="collapsed",
             )
             st.session_state.cw_meals[d] = choice
         with c3:
             if st.button("🎲", key=f"cw_meal_reroll_{d}", help=f"Reroll {d}'s dinner"):
                 if pool:
-                    if f"cw_meal_sel_{d}" in st.session_state:
-                        del st.session_state[f"cw_meal_sel_{d}"]
-                    st.session_state.cw_meals[d] = random.choice(pool)
+                    new_choice = random.choice(pool)
+                    st.session_state.cw_meals[d] = new_choice
+                    st.session_state[key] = new_choice
                     st.rerun()
 
     st.markdown("---")
