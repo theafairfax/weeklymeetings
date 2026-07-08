@@ -1,6 +1,6 @@
 """
 app.py — Weekly Meetings entry point.
-Navigation: Week Library | Create Week | Review Week
+Navigation: Week Library | Create Week | Review Week | Financial Analytics
 """
 import streamlit as st
 
@@ -89,7 +89,7 @@ with st.sidebar:
     st.markdown("---")
     page = st.radio(
         "Navigate",
-        ["📚 Week Library", "🛠️ Create Week", "🔍 Review Week"],
+        ["📚 Week Library", "🛠️ Create Week", "🔍 Review Week", "💰 Financial Analytics"],
         label_visibility="collapsed",
     )
     st.markdown("---")
@@ -102,6 +102,9 @@ if page == "📚 Week Library":
 elif page == "🛠️ Create Week":
     import create_week
     create_week.render()
-else:
+elif page == "🔍 Review Week":
     import review_week
     review_week.render()
+elif page == "💰 Financial Analytics":
+    import ynab_analytics
+    ynab_analytics.render()
