@@ -57,28 +57,37 @@ def _clean(df: pd.DataFrame, cols: list) -> pd.DataFrame:
     return df.fillna("").astype(str)
 
 
-def load_meal_library() -> pd.DataFrame:
-    df = _conn().read(worksheet=MEAL_WS, ttl=0)
+# sheets.py — Modified to handle caching gracefully
+
+# ... (keep your existing imports, constants, and _conn / _clean helpers)
+
+def load_meal_library(force_refresh=False) -> pd.DataFrame:
+    # If forcing a refresh, set ttl=0 to bypass cache; otherwise, cache for 10 minutes
+    ttl_value = 0 if force_refresh else "10m"
+    df = _conn().read(worksheet=MEAL_WS, ttl=ttl_value)
     return _clean(df, MEAL_COLS)
 
-
-def load_task_library() -> pd.DataFrame:
-    df = _conn().read(worksheet=TASK_WS, ttl=0)
+def load_task_library(force_refresh=False) -> pd.DataFrame:
+    ttl_value = 0 if force_refresh else "10m"
+    df = _conn().read(worksheet=TASK_WS, ttl=ttl_value)
     return _clean(df, TASK_COLS)
 
-
-def load_view_weeks() -> pd.DataFrame:
-    df = _conn().read(worksheet=VIEW_WS, ttl=0)
+def load_view_weeks(force_refresh=False) -> pd.DataFrame:
+    ttl_value = 0 if force_refresh else "10m"
+    df = _conn().read(worksheet=VIEW_WS, ttl=ttl_value)
     return _clean(df, VIEW_COLS)
-
 
 def save_meal_library(df: pd.DataFrame) -> None:
     _conn().update(worksheet=MEAL_WS, data=df[MEAL_COLS])
-
+    # Force a refresh right after updating to clear the cached state
+    load_meal_library(force_refresh=True)
 
 def save_task_library(df: pd.DataFrame) -> None:
     _conn().update(worksheet=TASK_WS, data=df[TASK_COLS])
-
+    # Force a refresh right after updating to clear the cached state
+    load_task_library(force_refresh=True)
 
 def save_view_weeks(df: pd.DataFrame) -> None:
     _conn().update(worksheet=VIEW_WS, data=df[VIEW_COLS])
+    # Force a refresh right after updating to clear the cached state
+    load_view_weeks(force_refresh=True)
