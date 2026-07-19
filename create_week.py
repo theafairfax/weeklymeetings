@@ -10,7 +10,9 @@ import pandas as pd
 from sheets import (
     load_meal_library, load_task_library, load_view_weeks,
     save_meal_library, save_task_library, save_view_weeks,
+    save_new_meal,  # <-- ADD THIS IMPORT
 )
+
 from logic import (
     build_meal_pool, available_tasks, next_monday_after, format_date,
     join_tasks, split_tasks_cell, shuffle_meals, shuffle_tasks,
@@ -181,13 +183,35 @@ def _meals_phase(meal_df, view_df):
                 st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.rerun()
 
-    with col_b:
+with col_b:
         if st.button("🎲 Shuffle Remaining Days"):
             new_meals = shuffle_meals(pool, days=day_names, existing=st.session_state.cw_meals)
             for d in day_names:
                 st.session_state.cw_meals[d] = new_meals.get(d, "")
                 st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.rerun()
+
+    # ── ADD THIS NEW EXPANDER SECTION HERE ─────────────────────────────────
+    st.markdown("---")
+    with st.expander("➕ Add a new meal to Master Library"):
+        with st.form("cw_new_meal_form", clear_on_submit=True):
+            c_prot, c_side, c_cour = st.columns(3)
+            with c_prot:
+                new_protein = st.text_input("Protein", key="cw_meal_prot")
+            with c_side:
+                new_side = st.text_input("Side (optional)", key="cw_meal_side")
+            with c_cour:
+                new_course = st.text_input("Course/Style", key="cw_meal_cour", placeholder="e.g. Tacos, Pasta")
+                
+            if st.form_submit_button("Save Meal Globally"):
+                # Validate that at least something was written
+                if new_protein.strip() or new_course.strip():
+                    save_new_meal(new_protein, new_side, new_course)
+                    st.success(f"Added meal to Library! Your pool has refreshed.")
+                    st.rerun()
+                else:
+                    st.warning("Please provide at least a Protein or a Course name.")
+    # ───────────────────────────────────────────────────────────────────────
 
     st.markdown("---")
     for d in day_names:
