@@ -57,3 +57,25 @@ def save_view_weeks(df: pd.DataFrame) -> None:
     _conn().update(worksheet=VIEW_WS, data=df[VIEW_COLS])
     # Evict all data from memory so the next load_view_weeks call grabs fresh data
     st.cache_data.clear()
+
+# ── Mutation Functions with Explicit Cache Clearing ──────────────────────
+def save_meal_library(df: pd.DataFrame) -> None:
+    _conn().update(worksheet=MEAL_WS, data=df[MEAL_COLS])
+    st.cache_data.clear()
+
+# ADD THIS NEW FUNCTION HERE:
+def save_new_meal(protein: str, side: str, course: str) -> None:
+    """Appends a single new meal entry into the Meal Library sheet."""
+    # 1. Load the fresh sheet data
+    df = load_meal_library()
+    
+    # 2. Package the new inputs into a DataFrame row
+    new_row = pd.DataFrame([{
+        "Protein": protein.strip(),
+        "Side": side.strip(),
+        "Course": course.strip()
+    }])
+    
+    # 3. Combine and push to the Google Sheet using the existing save logic
+    updated_df = pd.concat([df, new_row], ignore_index=True)
+    save_meal_library(updated_df)
