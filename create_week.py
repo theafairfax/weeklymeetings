@@ -183,7 +183,7 @@ def _meals_phase(meal_df, view_df):
                 st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.rerun()
 
-with col_b:
+    with col_b:
         if st.button("🎲 Shuffle Remaining Days"):
             new_meals = shuffle_meals(pool, days=day_names, existing=st.session_state.cw_meals)
             for d in day_names:
@@ -191,7 +191,7 @@ with col_b:
                 st.session_state[f"cw_meal_sel_{d}"] = new_meals.get(d, "")
             st.rerun()
 
-    # ── ADD THIS NEW EXPANDER SECTION HERE ─────────────────────────────────
+    # ── Added Master Library Form ──────────────────────────────────────────
     st.markdown("---")
     with st.expander("➕ Add a new meal to Master Library"):
         with st.form("cw_new_meal_form", clear_on_submit=True):
@@ -204,7 +204,6 @@ with col_b:
                 new_course = st.text_input("Course/Style", key="cw_meal_cour", placeholder="e.g. Tacos, Pasta")
                 
             if st.form_submit_button("Save Meal Globally"):
-                # Validate that at least something was written
                 if new_protein.strip() or new_course.strip():
                     save_new_meal(new_protein, new_side, new_course)
                     st.success(f"Added meal to Library! Your pool has refreshed.")
@@ -248,7 +247,6 @@ with col_b:
     if st.button("✅ Approve Meals"):
         st.session_state.cw_meals_approved = True
         st.success("Meals approved. Move on to the Tasks tab →")
-
 
 # ── Phase 2: Tasks ──────────────────────────────────────────────────────
 def _tasks_phase(task_df):
