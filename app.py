@@ -83,6 +83,29 @@ div[data-testid="stSidebar"] {
 </style>
 """, unsafe_allow_html=True)
 
+# ── Password gate ──────────────────────────────────────────────────────────────
+APP_PASSWORD = "Bowser1!123"
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.markdown("## 🔒 Household Council")
+    st.write("Enter the password to access the application.")
+
+    with st.form("login_form"):
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Enter")
+
+    if submitted:
+        if password == APP_PASSWORD:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("Incorrect password.")
+
+    st.stop()
+
 # ── Sidebar navigation ─────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## 📜 Household Council")
