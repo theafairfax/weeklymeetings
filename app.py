@@ -2,6 +2,8 @@
 app.py — Weekly Meetings entry point.
 Navigation: Week Library | Create Week | Review Week | Financial Analytics
 """
+import hmac
+
 import streamlit as st
 
 st.set_page_config(
@@ -84,7 +86,15 @@ div[data-testid="stSidebar"] {
 """, unsafe_allow_html=True)
 
 # ── Password gate ──────────────────────────────────────────────────────────────
-APP_PASSWORD = "Bowser1!123"
+# Read the login credential only from private Streamlit Secrets.
+try:
+    APP_PASSWORD = st.secrets.get("APP_PASSWORD", "")
+except (FileNotFoundError, KeyError):
+    APP_PASSWORD = ""
+
+if not isinstance(APP_PASSWORD, str) or not APP_PASSWORD:
+    st.error("App password is not configured. Set APP_PASSWORD in Streamlit Secrets.")
+    st.stop()
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -98,7 +108,7 @@ if not st.session_state.authenticated:
         submitted = st.form_submit_button("Enter")
 
     if submitted:
-        if password == APP_PASSWORD:
+        if hmac.compare_digest(password, APP_PASSWORD):
             st.session_state.authenticated = True
             st.rerun()
         else:
