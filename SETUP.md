@@ -40,6 +40,17 @@ as `spreadsheet`.
 `secrets.toml` is already covered by `.gitignore`-style caution — never
 commit your real key to a public repo.
 
+For the login screen, also add a top-level password secret to Streamlit Cloud's
+**App settings → Secrets** (or to your local `.streamlit/secrets.toml`):
+
+```toml
+APP_PASSWORD = "choose-your-own-strong-password"
+```
+
+Keep `APP_PASSWORD` outside the `[connections.gsheets]` section. The app
+remains locked when the secret is missing or empty, with no hardcoded fallback.
+Never commit your actual password or service-account keys to GitHub.
+
 ## 4. Install & run
 ```bash
 pip install -r requirements.txt
